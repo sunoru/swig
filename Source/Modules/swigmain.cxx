@@ -34,6 +34,7 @@ extern "C" {
   Language *swig_modula3(void);
   Language *swig_mzscheme(void);
   Language *swig_java(void);
+  Language *swig_julia(void);
   Language *swig_php(void);
   Language *swig_php4(void);
   Language *swig_php5(void);
@@ -77,6 +78,7 @@ static swig_module modules[] = {
   {"-guile", swig_guile, "Guile"},
   {"-java", swig_java, "Java"},
   {"-javascript", swig_javascript, "Javascript"},
+  {"-julia", swig_julia, "Julia"},
   {"-lua", swig_lua, "Lua"},
   {"-modula3", swig_modula3, "Modula 3"},
   {"-mzscheme", swig_mzscheme, "Mzscheme"},
