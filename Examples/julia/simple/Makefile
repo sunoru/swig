@@ -7,17 +7,12 @@ INTERFACE  = example.i
 SWIGOPT    =
 
 check: build
-	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' perl5_run
+	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' julia_run
 
 build:
 	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' SRCS='$(SRCS)' \
 	SWIG_LIB_DIR='$(SWIG_LIB_DIR)' SWIGEXE='$(SWIGEXE)' \
-	SWIGOPT='$(SWIGOPT)' TARGET='$(TARGET)' INTERFACE='$(INTERFACE)' perl5
-
-static:
-	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' SRCS='$(SRCS)' \
-	SWIG_LIB_DIR='$(SWIG_LIB_DIR)' SWIGEXE='$(SWIGEXE)' \
-	SWIGOPT='$(SWIGOPT)' TARGET='myperl' INTERFACE='$(INTERFACE)' perl5_static
+	SWIGOPT='$(SWIGOPT)' TARGET='$(TARGET)' INTERFACE='$(INTERFACE)' julia
 
 clean:
-	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' perl5_clean
+	$(MAKE) -f $(TOP)/Makefile SRCDIR='$(SRCDIR)' julia_clean

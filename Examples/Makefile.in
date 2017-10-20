@@ -2133,3 +2133,52 @@ d_clean:
 	rm -f *_wrap* *~ .~* $(RUNME) $(RUNME).exe `find . -name \*.d | grep -v $(RUNME).d`
 	rm -f core @EXTRA_CLEAN@
 	rm -f *.@OBJEXT@ *@SO@
+
+##################################################################
+#####                      JULIA                            ######
+##################################################################
+
+JULIA_CCCDLFLAGS = -fPIC
+JULIA = julia
+JULIA_SCRIPT = $(SRCDIR)$(RUNME).jl
+
+# ----------------------------------------------------------------
+# Build a Julia dynamically loadable module (C)
+# ----------------------------------------------------------------
+
+julia: $(SRCDIR_SRCS)
+	$(SWIG) -julia $(SWIGOPT) -o $(ISRCS) $(INTERFACEPATH)
+	$(CC) -c -Dbool=char $(CCSHARED) $(CPPFLAGS) $(CFLAGS) $(SRCDIR_SRCS) $(ISRCS) $(INCLUDES) $(JULIA_CCCDLFLAGS)
+	$(LDSHARED) $(CFLAGS) $(LDFLAGS) $(JULIA_CCDLFLAGS) $(OBJS) $(IOBJS) $(LIBS) -o $(LIBPREFIX)$(TARGET)$(SO)
+
+# ----------------------------------------------------------------
+# Build a Julia dynamically loadable module (C++)
+# ----------------------------------------------------------------
+
+julia_cpp: $(SRCDIR_SRCS)
+	$(SWIG) -julia -c++ $(SWIGOPT) -o $(ISRCS) $(INTERFACEPATH)
+	$(CC) -c -Dbool=char $(CCSHARED) $(CPPFLAGS) $(CFLAGS) $(SRCDIR_SRCS) $(ISRCS) $(INCLUDES) $(JULIA_CCCDLFLAGS)
+	$(LDSHARED) $(CFLAGS) $(LDFLAGS) $(JULIA_CCDLFLAGS) $(OBJS) $(IOBJS) $(LIBS) -o $(LIBPREFIX)$(TARGET)$(SO)
+
+# -----------------------------------------------------------------
+# Running a Julia example
+# -----------------------------------------------------------------
+
+julia_run:
+	$(RUNTOOL) $(JULIA) $(JULIA_SCRIPT) $(RUNPIPE)
+
+# -----------------------------------------------------------------
+# Version display
+# -----------------------------------------------------------------
+
+julia_version:
+	$(JULIA) -e "versioninfo()"
+
+# -----------------------------------------------------------------
+# Cleaning the Julia examples
+# -----------------------------------------------------------------
+
+julia_clean:
+	rm -f *_wrap* *~ .~*
+	rm -f core 
+	rm -f *.o *.so

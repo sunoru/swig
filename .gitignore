@@ -154,6 +154,11 @@ Examples/java/*/*.java
 Examples/test-suite/javascript/*/
 *.gyp
 
+# Julia
+Examples/test-suite/julia/*/
+Examples/julia/*/*.jl
+!Examples/julia/*/runme.jl
+
 # Octave
 swigexample*.oct
 Examples/test-suite/octave/*.oct
