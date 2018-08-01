@@ -17,7 +17,7 @@
 
 %define SWIG_STD_ARRAY_INTERNAL(T, N)
 %typemap(csinterfaces) std::array< T, N > "global::System.IDisposable, global::System.Collections.IEnumerable\n    , global::System.Collections.Generic.IEnumerable<$typemap(cstype, T)>\n";
-%typemap(cscode) std::array< T, N > %{
+%proxycode %{
   public $csclassname(global::System.Collections.ICollection c) : this() {
     if (c == null)
       throw new global::System.ArgumentNullException("c");
@@ -174,7 +174,7 @@
     bool empty() const;
 
     %rename(Fill) fill;
-    void fill(const value_type& val);
+    void fill(const value_type& value);
 
     %rename(Swap) swap;
     void swap(array& other);
@@ -192,9 +192,9 @@
         else
           throw std::out_of_range("index");
       }
-      void setitem(int index, const_reference val) throw (std::out_of_range) {
+      void setitem(int index, const_reference value) throw (std::out_of_range) {
         if (index>=0 && index<(int)$self->size())
-          (*$self)[index] = val;
+          (*$self)[index] = value;
         else
           throw std::out_of_range("index");
       }

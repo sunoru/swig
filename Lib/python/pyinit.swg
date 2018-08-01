@@ -84,10 +84,10 @@ swig_varlink_str(swig_varlinkobject *v) {
 
 SWIGINTERN int
 swig_varlink_print(swig_varlinkobject *v, FILE *fp, int SWIGUNUSEDPARM(flags)) {
-  char *tmp;
   PyObject *str = swig_varlink_str(v);
+  const char *tmp = SWIG_Python_str_AsChar(str);
   fprintf(fp,"Swig global variables ");
-  fprintf(fp,"%s\n", tmp = SWIG_Python_str_AsChar(str));
+  fprintf(fp,"%s\n", tmp ? tmp : "Invalid global variable");
   SWIG_Python_str_DelForPy3(tmp);
   Py_DECREF(str);
   return 0;
@@ -175,15 +175,9 @@ swig_varlink_type(void) {
       0,                                  /* tp_clear */
       0,                                  /* tp_richcompare */
       0,                                  /* tp_weaklistoffset */
-#if PY_VERSION_HEX >= 0x02020000
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* tp_iter -> tp_weaklist */
-#endif
-#if PY_VERSION_HEX >= 0x02030000
       0,                                  /* tp_del */
-#endif
-#if PY_VERSION_HEX >= 0x02060000
       0,                                  /* tp_version_tag */
-#endif
 #if PY_VERSION_HEX >= 0x03040000
       0,                                  /* tp_finalize */
 #endif
@@ -191,20 +185,14 @@ swig_varlink_type(void) {
       0,                                  /* tp_allocs */
       0,                                  /* tp_frees */
       0,                                  /* tp_maxalloc */
-#if PY_VERSION_HEX >= 0x02050000
       0,                                  /* tp_prev */
-#endif
       0                                   /* tp_next */
 #endif
     };
     varlink_type = tmp;
     type_init = 1;
-#if PY_VERSION_HEX < 0x02020000
-    varlink_type.ob_type = &PyType_Type;
-#else
     if (PyType_Ready(&varlink_type) < 0)
       return NULL;
-#endif
   }
   return &varlink_type;
 }
@@ -306,9 +294,9 @@ SWIG_Python_FixMethods(PyMethodDef *methods,
 	  char *ndoc = (char*)malloc(ldoc + lptr + 10);
 	  if (ndoc) {
 	    char *buff = ndoc;
-	    strncpy(buff, methods[i].ml_doc, ldoc);
+	    memcpy(buff, methods[i].ml_doc, ldoc);
 	    buff += ldoc;
-	    strncpy(buff, "swig_ptr: ", 10);
+	    memcpy(buff, "swig_ptr: ", 10);
 	    buff += 10;
 	    SWIG_PackVoidPtr(buff, ptr, ty->name, lptr);
 	    methods[i].ml_doc = ndoc;
@@ -341,16 +329,7 @@ SWIG_init(void) {
   PyObject *m, *d, *md;
 #if PY_VERSION_HEX >= 0x03000000
   static struct PyModuleDef SWIG_module = {
-# if PY_VERSION_HEX >= 0x03020000
     PyModuleDef_HEAD_INIT,
-# else
-    {
-      PyObject_HEAD_INIT(NULL)
-      NULL, /* m_init */
-      0,    /* m_index */
-      NULL, /* m_copy */
-    },
-# endif
     (char *) SWIG_name,
     NULL,
     -1,
@@ -368,8 +347,8 @@ SWIG_init(void) {
     (char *)"this", &SwigPyBuiltin_ThisClosure, NULL, NULL, NULL
   };
   static SwigPyGetSet thisown_getset_closure = {
-    (PyCFunction) SwigPyObject_own,
-    (PyCFunction) SwigPyObject_own
+    SwigPyObject_own,
+    SwigPyObject_own
   };
   static PyGetSetDef thisown_getset_def = {
     (char *)"thisown", SwigPyBuiltin_GetterClosure, SwigPyBuiltin_SetterClosure, NULL, &thisown_getset_closure
@@ -398,6 +377,17 @@ SWIG_init(void) {
   /* Metaclass is used to implement static member variables */
   metatype = SwigPyObjectType();
   assert(metatype);
+#endif
+
+  /* Create singletons now to avoid potential deadlocks with multi-threaded usage after module initialization */
+#ifdef SWIG_PYTHON_BUILD_NONE
+  SWIG_Py_None();
+#endif
+  SWIG_This();
+  SWIG_Python_TypeCache();
+  SwigPyPacked_type();
+#ifndef SWIGPYTHON_BUILTIN
+  SwigPyObject_type();
 #endif
 
   /* Fix SwigMethods to carry the callback ptrs when needed */

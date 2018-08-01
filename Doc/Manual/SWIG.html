@@ -131,7 +131,6 @@ can be obtained by typing <tt>swig -help</tt> or <tt>swig
 -ocaml                Generate Ocaml wrappers
 -octave               Generate Octave wrappers
 -perl                 Generate Perl wrappers
--php5                 Generate PHP5 wrappers
 -php7                 Generate PHP7 wrappers
 -pike                 Generate Pike wrappers
 -python               Generate Python wrappers
@@ -145,7 +144,7 @@ can be obtained by typing <tt>swig -help</tt> or <tt>swig
 
 -c++                  Enable C++ processing
 -cppext <em>ext</em>           Change file extension of C++ generated files to <em>ext</em>
-                      (default is cxx, except for PHP5 which uses cpp)
+                      (default is cxx)
 -D<em>symbol</em>              Define a preprocessor symbol
 -Fmicrosoft           Display error/warning messages in Microsoft format
 -Fstandard            Display error/warning messages in commonly used format
@@ -162,6 +161,32 @@ can be obtained by typing <tt>swig -help</tt> or <tt>swig
 -version              Display SWIG version number
 
 </pre></div>
+
+<p>
+Arguments may also be passed in a command-line options file (also known as a
+response file) which is useful if they exceed the system command line length
+limit. To do this, put the arguments in a file, then provide the file name
+prefixed with <tt>@</tt> like so:
+</p>
+
+<div class="shell"><pre>
+swig @<em>file</em>
+</pre></div>
+
+<p>
+The options read from the file are inserted in place of the file option. If the
+file does not exist, or cannot be read, then the option will be treated
+literally and not removed.
+</p>
+
+<p>
+Options in the file are separated by whitespace. A whitespace character may be
+included in an option by surrounding the entire option in either single or
+double quotes. Any character (including a backslash) may be included by
+prefixing the character to be included with a backslash. The file may itself
+contain additional <tt>@file</tt> options; any such options will be processed
+recursively.
+</p>
 
 <H3><a name="SWIG_nn3">5.1.1 Input format</a></H3>
 
@@ -389,7 +414,7 @@ For example
 /* bar not wrapped unless foo has been defined and 
    the declaration of bar within foo has already been parsed */
 int foo::bar(int) {
-    ... whatever ...
+  ... whatever ...
 }
 </pre>
 </div>
@@ -750,7 +775,7 @@ form of type-checking however).</p>
 <p>
 For enumerations, it is critical that the original enum definition be
 included somewhere in the interface file (either in a header file or
-in the <tt>%{, %}</tt> block). SWIG only translates the enumeration
+in the <tt>%{ %}</tt> block). SWIG only translates the enumeration
 into code needed to add the constants to a scripting language. It
 needs the original enumeration declaration in order to get the correct
 enum values as assigned by the C compiler.
@@ -1043,14 +1068,14 @@ expect :</p>
 <div class="targetlang"><pre>
 # Copy a file 
 def filecopy(source, target):
-  f1 = fopen(source, "r")
-  f2 = fopen(target, "w")
-  buffer = malloc(8192)
-  nbytes = fread(buffer, 8192, 1, f1)
-  while (nbytes &gt; 0):
-    fwrite(buffer, 8192, 1, f2)
-          nbytes = fread(buffer, 8192, 1, f1)
-  free(buffer)
+    f1 = fopen(source, "r")
+    f2 = fopen(target, "w")
+    buffer = malloc(8192)
+    nbytes = fread(buffer, 8192, 1, f1)
+    while (nbytes &gt; 0):
+        fwrite(buffer, 8192, 1, f2)
+            nbytes = fread(buffer, 8192, 1, f1)
+    free(buffer)
 </pre></div>
 
 <p>
@@ -1236,9 +1261,9 @@ creating a wrapper equivalent to the following:
 
 <div class="code"><pre>
 double wrap_dot_product(Vector *a, Vector *b) {
-    Vector x = *a;
-    Vector y = *b;
-    return dot_product(x, y);
+  Vector x = *a;
+  Vector y = *b;
+  return dot_product(x, y);
 }
 </pre></div>
 
@@ -1266,12 +1291,12 @@ pointers.  As a result, SWIG creates a wrapper like this:
 
 <div class="code"><pre>
 Vector *wrap_cross_product(Vector *v1, Vector *v2) {
-        Vector x = *v1;
-        Vector y = *v2;
-        Vector *result;
-        result = (Vector *) malloc(sizeof(Vector));
-        *(result) = cross(x, y);
-        return result;
+  Vector x = *v1;
+  Vector y = *v2;
+  Vector *result;
+  result = (Vector *) malloc(sizeof(Vector));
+  *(result) = cross(x, y);
+  return result;
 }
 </pre></div>
 
@@ -1280,10 +1305,10 @@ or if SWIG was run with the <tt>-c++</tt> option:</p>
 
 <div class="code"><pre>
 Vector *wrap_cross(Vector *v1, Vector *v2) {
-        Vector x = *v1;
-        Vector y = *v2;
-        Vector *result = new Vector(cross(x, y)); // Uses default copy constructor
-        return result;
+  Vector x = *v1;
+  Vector y = *v2;
+  Vector *result = new Vector(cross(x, y)); // Uses default copy constructor
+  return result;
 }
 </pre></div>
 
@@ -1737,6 +1762,16 @@ careful about namespaces and your use of modules, you can usually
 avoid these problems.</p>
 
 <p>
+When wrapping C code, simple use of identifiers/symbols with <tt>%rename</tt> usually suffices.
+When wrapping C++ code, simple use of simple identifiers/symbols with <tt>%rename</tt> might be too
+limiting when using C++ features such as function overloading, default arguments, namespaces, template specialization etc.
+If you are using the <tt>%rename</tt> directive and C++, make sure you read the
+<a href="SWIGPlus.html">SWIG and C++</a> chapter and in particular the section on
+<a href="SWIGPlus.html#SWIGPlus_ambiguity_resolution_renaming">Renaming and ambiguity resolution</a>
+for method overloading and default arguments.
+</p>
+
+<p>
 Closely related to <tt>%rename</tt> is the <tt>%ignore</tt> directive.  <tt>%ignore</tt> instructs SWIG
 to ignore declarations that match a given identifier.  For example:
 </p>
@@ -2078,7 +2113,7 @@ except those consisting of capital letters only:
 <p>
 Finally, variants of <tt>%rename</tt> and <tt>%ignore</tt> directives can be used to help
 wrap C++ overloaded functions and methods or C++ methods which use default arguments. This is described in the
-<a href="SWIGPlus.html#SWIGPlus_ambiguity_resolution_renaming">Ambiguity resolution and renaming</a> section in the C++ chapter.
+<a href="SWIGPlus.html#SWIGPlus_ambiguity_resolution_renaming">Renaming and ambiguity resolution</a> section in the C++ chapter.
 </p>
 
 
@@ -2167,7 +2202,7 @@ in the C++ chapter for further details.
 <p>
 Occasionally, a C library may include functions that expect to receive
 pointers to functions--possibly to serve as callbacks. SWIG
-provides full support for function pointers provided that the callback
+provides full support for function pointers when the callback
 functions are defined in C and not in the target language.  For example,
 consider a function like this:
 </p>
@@ -2311,7 +2346,9 @@ And now, a final note about function pointer support.  Although SWIG
 does not normally allow callback functions to be written in the target language, this
 can be accomplished with the use of typemaps and other advanced SWIG features.
 See the <a href="Typemaps.html#Typemaps">Typemaps chapter</a> for more about typemaps
-and individual target language chapters for more on callbacks and the 'director' feature.
+and individual target language chapters for more on callbacks.
+The 'director' feature can be used to make callbacks from C/C++ into the target language,
+see <a href="SWIGPlus.html#SWIGPlus_target_language_callbacks">Callbacks to the target language</a>.
 </p>
 
 <H2><a name="SWIG_nn31">5.5 Structures and unions</a></H2>
@@ -2368,10 +2405,10 @@ defined in the interface.  For example:
 
 <div class="code"><pre>
 struct Vector *new_Vector() {
-    return (Vector *) calloc(1, sizeof(struct Vector));
+  return (Vector *) calloc(1, sizeof(struct Vector));
 }
 void delete_Vector(struct Vector *obj) {
-    free(obj);
+  free(obj);
 }
 </pre>
 </div>
@@ -2602,10 +2639,10 @@ like this:
 <div class="code">
 <pre>
 WORD Foo_w_get(Foo *f) {
-    return f-&gt;w;
+  return f-&gt;w;
 }
 void Foo_w_set(FOO *f, WORD value) {
-    f-&gt;w = value;
+  f-&gt;w = value;
 }
 </pre>
 </div>
@@ -2896,7 +2933,7 @@ instead of a method.  To do this, you might write some code like this:
 <pre>
 // Add a new attribute to Vector
 %extend Vector {
-    const double magnitude;
+  const double magnitude;
 }
 // Now supply the implementation of the Vector_magnitude_get function
 %{
@@ -3140,9 +3177,9 @@ output of SWIG is structured first.</p>
 
 
 <p>
-When SWIG creates its output file, it is broken up into five sections
+When SWIG creates its output C/C++ file, it is broken up into five sections
 corresponding to runtime code, headers, wrapper functions, and module
-initialization code (in that order).   
+initialization code (in that order).
 </p>
 
 <ul>
@@ -3176,9 +3213,37 @@ the module upon loading.
 
 
 <p>
-Code is inserted into the appropriate code section by using one
-of the code insertion directives listed below. The order of the sections in
-the wrapper file is as shown:
+The <tt>%insert</tt> directive enables inserting blocks of code into a given section of the generated code.
+It can be used in one of two ways:
+</p>
+
+<div class="code">
+<pre>
+%insert("section") "filename"
+%insert("section") %{ ... %}
+</pre>
+</div>
+
+<p>
+The first will dump the contents of the file in the given <tt>filename</tt> into the named <tt>section</tt>.
+The second inserts the code between the braces into the named <tt>section</tt>.
+For example, the following adds code into the runtime section:
+</p>
+
+<div class="code">
+<pre>
+%insert("runtime") %{
+  ... code in runtime section ...
+%}
+</pre>
+</div>
+
+<p>
+There are the 5 sections, however, some target languages add in additional sections and some of these result in code being generated into a target language file instead of the C/C++ wrapper file.
+These are documented when available in the target language chapters.
+Macros named after the code sections are available as additional directives and these macro directives are normally used instead of <tt>%insert</tt>.
+For example, <tt>%runtime</tt> is used instead of <tt>%insert("runtime")</tt>.
+The valid sections and order of the sections in the generated C/C++ wrapper file is as shown:
 </p>
 
 <div class="code">
@@ -3265,17 +3330,38 @@ Vector *new_Vector() {
   return (Vector *) malloc(sizeof(Vector));
 }
 %}
-
 </pre></div>
 
 <p>
-The <tt>%inline</tt> directive inserts all of the code that follows
+This is the same as writing:
+</p>
+
+<div class="code"><pre>
+%{
+/* Create a new vector */
+Vector *new_Vector() {
+  return (Vector *) malloc(sizeof(Vector));
+}
+%}
+
+/* Create a new vector */
+Vector *new_Vector() {
+  return (Vector *) malloc(sizeof(Vector));
+}
+</pre></div>
+<p>
+In other words, the <tt>%inline</tt> directive inserts all of the code that follows
 verbatim into the header portion of an interface file. The code is
 then parsed by both the SWIG preprocessor and parser.
 Thus, the above example creates a new command <tt>new_Vector</tt> using only one
 declaration. Since the code inside an <tt>%inline %{ ... %}</tt> block
 is given to both the C compiler and SWIG, it is illegal to include any
 SWIG directives inside a <tt>%{ ... %}</tt> block.</p>
+
+
+<p>
+<b>Note:</b> The usual SWIG C preprocessor rules apply to code in <tt>%apply</tt> blocks when SWIG parses this code. For example, as mentioned earlier, <a href="SWIG.html#SWIG_nn6">SWIG's C Preprocessor</a> does not follow <tt>#include</tt> directives by default.
+</p>
 
 <H3><a name="SWIG_nn44">5.6.4 Initialization blocks</a></H3>
 
@@ -3442,7 +3528,7 @@ header files.
 <p>
 Sometimes, it is necessary to use certain header files in order for
 the code generated by SWIG to compile properly. Make sure you
-include certain header files by using a <tt>%{, %}</tt> block like this:
+include certain header files by using a <tt>%{ %}</tt> block like this:
 </p>
 
 <div class="code"><pre>
